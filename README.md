@@ -55,8 +55,8 @@ public class User
     public static Result<User> CreateUser(string firstName, string lastName, string email)
     {
         var errors = new List<string>();
-        if (string.IsNullOrEmpty(firstName)) errors.Add("First name cannont be empty!");
-        if (string.IsNullOrEmpty(lastName)) errors.Add("Last name cannont be empty!");
+        if (string.IsNullOrEmpty(firstName)) errors.Add("First name cannot be empty!");
+        if (string.IsNullOrEmpty(lastName)) errors.Add("Last name cannot be empty!");
         if (string.IsNullOrEmpty(email)) errors.Add("Email cannot be empty!");
 
         if (errors.Count > 0)

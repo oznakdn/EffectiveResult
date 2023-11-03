@@ -1,4 +1,6 @@
 # Effective Result
+### Result pattern for returning from domain and services.
+
 `dotnet` CLI
 
 ```bash

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Title>Result pattern for returning from domain and services.</Title>
+    <Version>7.0.0</Version>
+    <Description>Result pattern for returning from domain and services.</Description>
+  </PropertyGroup>
+
+</Project>

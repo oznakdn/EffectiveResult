@@ -25,6 +25,11 @@ where T : class
         };
     }
 
+    public static async Task<Result<T>> OkAsync(T value = null, IEnumerable<T> values = null, string message = null)
+    {
+        return await Task.Run(() => Ok(value, values, message));
+    }
+
     public static Result<T> Fail(string errorMessage = null, IEnumerable<string> errorMessages = null)
     {
         return new Result<T>
@@ -36,6 +41,11 @@ where T : class
             Value = null,
             Values = Enumerable.Empty<T>(),
         };
+    }
+
+    public static async Task<Result<T>> FailAsync(string errorMessage = null, IEnumerable<string> errorMessages = null)
+    {
+        return await Task.Run(() => Fail(errorMessage, errorMessages));
     }
 
 }

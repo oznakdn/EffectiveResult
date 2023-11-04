@@ -24,6 +24,12 @@ public sealed class Result : IResult
         };
     }
 
+    public async static Task<Result> OkAsync(string message = null)
+    {
+        return await Task.Run(() => Ok(message));
+    }
+
+
     public static Result Fail(string errorMessage = null, IEnumerable<string> errorMessages = null)
     {
         return new Result
@@ -33,6 +39,12 @@ public sealed class Result : IResult
             Message = errorMessage ?? string.Empty,
             Errors = errorMessages ?? Enumerable.Empty<string>()
         };
+    }
+
+
+    public async static Task<Result> FailAsync(string errorMessage = null, IEnumerable<string> errorMessages = null)
+    {
+        return await Task.Run(() => Fail(errorMessage, errorMessages));
     }
 
 }

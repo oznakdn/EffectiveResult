@@ -21,4 +21,23 @@ public class ResultTests
         Assert.Empty(result.Errors);
 
     }
+
+    [Fact]
+    public async Task ChangeEmailAsync_When_ParameterInvalid_Should_Return_Failed()
+    {
+        var result = await User.ChangeEmailAsync("");
+        Assert.True(result.IsFailed);
+        Assert.Equal<string>(result.Message, "Email cannot be empty!");
+        Assert.NotEmpty(result.Message);
+        Assert.Empty(result.Errors);
+    }
+
+    [Fact]
+    public async Task ChangeEmailAsync_When_ParameterInvalid_Should_Return_Successed()
+    {
+        var result = await User.ChangeEmailAsync("test@mail.com");
+        Assert.True(result.IsSuccessed);
+        Assert.Empty(result.Message);
+        Assert.Empty(result.Errors);
+    }
 }

@@ -7,25 +7,44 @@
 $ dotnet add package Gleeman.EffectiveResult
 ```
 
+# Result Usage
 
 ```csharp
-Result<T> Ok(T value = null, IEnumerable<T> values = null, string message = null)
-Result<T> OkAsync(T value = null, IEnumerable<T> values = null, string message = null)
-Result<T> Fail(string errorMessage = null, IEnumerable<string> errorMessages = null)
-Result<T> FailAsync(string errorMessage = null, IEnumerable<string> errorMessages = null)
-
+Result<User>.Failure(messages: errors);
 ```
 
 ```csharp
-Result Ok(string message = null)
-Result OkAsync(string message = null)
-Result Fail(string errorMessage = null, IEnumerable<string> errorMessages = null)
-Result FailAsync(string errorMessage = null, IEnumerable<string> errorMessages = null)
+Result.Failure(messages: errors);
 ```
 
-## USAGE
+# Response Usage
+
+```csharp
+new Response().Failure
+              .AddMessage(messages: result.Messages)
+              .AddStatusCode(400);
+
+new Response<User>().Failure
+                    .AddMessage(messages: result.Messages)
+                    .AddStatusCode(400);
+```
+
+```csharp
+
+new Response().Success
+              .AddStatusCode(200)
+              .AddMessage("User has been created successfully.");
+
+new Response<User>() .Success
+                     .AddStatusCode(200)
+                     .GetValue(value: result.Value);
+
+```
 
 
+# Example
+
+## Model
 ```csharp
 public class User
 {
@@ -34,7 +53,7 @@ public class User
     public string LastName { get; private set; }
     public string Email { get; private set; }
 
-    // CreateUser Sync
+
     public static Result<User> CreateUser(string firstName, string lastName, string email)
     {
         var errors = new List<string>();
@@ -43,7 +62,7 @@ public class User
         if (string.IsNullOrEmpty(email)) errors.Add("Email cannot be empty!");
 
         if (errors.Count > 0)
-            return Result<User>.Fail(errorMessages: errors);
+            return Result<User>.Failure(messages: errors);
 
         User user = new()
         {
@@ -53,48 +72,90 @@ public class User
         };
 
         _users.Add(user);
-        return Result<User>.Ok(user);
+        return Result<User>.Success(user);
     }
 
-    // CreateUser Async
-    public static async Task<Result<User>> CreateUserAsync(string firstName, string lastName, string email)
-    {
-        var errors = new List<string>();
-        if (string.IsNullOrEmpty(firstName)) errors.Add("First name cannot be empty!");
-        if (string.IsNullOrEmpty(lastName)) errors.Add("Last name cannot be empty!");
-        if (string.IsNullOrEmpty(email)) errors.Add("Email cannot be empty!");
 
-        if (errors.Count > 0)
-            return await Result<User>.FailAsync(errorMessages: errors);
-
-        User user = new()
-        {
-            FirstName = firstName,
-            LastName = lastName,
-            Email = email
-        };
-       _users.Add(user);
-        return await Result<User>.OkAsync(user);
-    }
-
-    // ChangeEmail Sync
     public static Result ChangeEmail(string email)
     {
         if (string.IsNullOrEmpty(email))
-            return Result.Fail("Email cannot be empty!");
-        return Result.Ok();
+            return Result.Failure("Email cannot be empty!");
+        return Result.Success();
     }
 
-    // ChangeEmail Async
-    public static async Task<Result> ChangeEmailAsync(string email)
+
+    public static Result<User> GetUsers() => Result<User>.Success(values: _users);
+
+```
+
+## Service
+
+```csharp
+public class UserService : IUserService
+{
+    public Response<User> CreateUser(UserDto user)
     {
-        if (string.IsNullOrEmpty(email))
-            return await Result.FailAsync("Email cannot be empty!");
-        return await Result.OkAsync();
+        var result = User.CreateUser(user.FirstName,user.LastName,user.Email);
+        if(!result.IsSuccessed)
+        {
+            return new Response<User>()
+                        .Failure
+                        .AddMessage(messages: result.Messages)
+                        .AddStatusCode(400);
+        }
+
+        return new Response<User>()
+                         .Success
+                         .AddStatusCode(200)
+                         .GetValue(value: result.Value);
     }
 
-    // GetUsers
-    public static Result<User> GetUsers()
-      => Result<User>.Ok(values: _users);
+    public Response<User> GetUsers()
+    {
+        var result = User.GetUsers();
+
+        if (result.Values.Count() == 0)
+            return new Response<User>()
+                        .Failure
+                        .AddMessage("There is no any user!")
+                        .AddStatusCode(200);
+
+        return new Response<User>()
+                        .Success
+                        .AddStatusCode(200)
+                        .GetValue(result.Values);
+
+    }
+}
+```
+
+## Controller
+
+```csharp
+
+[Route("api/[controller]")]
+[ApiController]
+public class UserController : ControllerBase
+{
+    private readonly IUserService userService;
+
+    public UserController(IUserService userService)
+    {
+        this.userService = userService;
+    }
+
+    [HttpPost]
+    public IActionResult CreateUser([FromBody] UserDto user)
+    {
+        var response = userService.CreateUser(user);
+        return response.IsSuccessed ? Ok(new { value = response.Value, statusCode = response.StatusCode }) : BadRequest(response.Messages);
+    }
+
+    [HttpGet]
+    public IActionResult GetUsers()
+    {
+        var response = userService.GetUsers();
+        return response.IsSuccessed ? Ok(new {value = response.Values , statusCode= response.StatusCode}) : NotFound(new {message = response.Message, statusCode = response.StatusCode});
+    }
 }
 ```

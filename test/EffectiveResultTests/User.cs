@@ -1,5 +1,6 @@
-﻿using Gleeman.EffectiveResult.Results;
-using Gleeman.EffectiveResult.ValueResults;
+﻿
+
+using Gleeman.EffectiveResult.Implementations;
 
 namespace EffectiveResultTests;
 
@@ -19,7 +20,7 @@ public class User
         if (string.IsNullOrEmpty(email)) errors.Add("Email cannot be empty!");
 
         if (errors.Count > 0)
-            return Result<User>.Fail(errorMessages: errors);
+            return Result<User>.Failure(messages: errors);
 
         User user = new()
         {
@@ -29,10 +30,23 @@ public class User
         };
 
         _users.Add(user);
-        return Result<User>.Ok(user);
+        return Result<User>.Success(user);
     }
 
-    public static async Task<Result<User>> CreateUserAsync(string firstName, string lastName, string email)
+
+    public static Result ChangeEmail(string email)
+    {
+        if (string.IsNullOrEmpty(email))
+            return Result.Failure("Email cannot be empty!");
+        return Result.Success();
+    }
+
+
+    public static Result<User> GetUsers() => Result<User>.Success(values: _users);
+
+
+
+    public static Response<User>Create(string firstName, string lastName, string email)
     {
         var errors = new List<string>();
         if (string.IsNullOrEmpty(firstName)) errors.Add("First name cannot be empty!");
@@ -40,7 +54,10 @@ public class User
         if (string.IsNullOrEmpty(email)) errors.Add("Email cannot be empty!");
 
         if (errors.Count > 0)
-            return await Result<User>.FailAsync(errorMessages: errors);
+            return new Response<User>()
+                .Failure
+                .AddMessage(messages: errors)
+                .AddStatusCode(400);
 
         User user = new()
         {
@@ -48,23 +65,32 @@ public class User
             LastName = lastName,
             Email = email
         };
-       _users.Add(user);
-        return await Result<User>.OkAsync(user);
+
+        _users.Add(user);
+
+        return new Response<User>()
+                    .Success
+                    .AddMessage("User has been created successfully")
+                    .AddStatusCode(200)
+                    .GetValue(user);
+
+
     }
 
-    public static Result ChangeEmail(string email)
+    public static Response<User>Get()
     {
-        if (string.IsNullOrEmpty(email))
-            return Result.Fail("Email cannot be empty!");
-        return Result.Ok();
+        var users = _users.ToList();
+
+        if (users.Count == 0)
+            return new Response<User>()
+                    .Failure
+                    .AddMessage("There is no any user!")
+                    .AddStatusCode(404);
+
+        return new Response<User>()
+                    .Success
+                    .AddStatusCode(200)
+                    .GetValue(users);
     }
 
-    public static async Task<Result> ChangeEmailAsync(string email)
-    {
-        if (string.IsNullOrEmpty(email))
-            return await Result.FailAsync("Email cannot be empty!");
-        return await Result.OkAsync();
-    }
-
-    public static Result<User> GetUsers() => Result<User>.Ok(values: _users);
 }

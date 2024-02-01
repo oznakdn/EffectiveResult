@@ -1,9 +1,11 @@
 ﻿namespace Gleeman.EffectiveResult.Interfaces;
 
-public interface IResult
+public interface IResult : IBase
 {
-    string Message { get; }
-    IEnumerable<string> Errors { get; }
-    bool IsFailed { get; }
-    bool IsSuccessed { get; }
+
+}
+
+public interface IResult<T> : IBase<T>
+{
+    
 }

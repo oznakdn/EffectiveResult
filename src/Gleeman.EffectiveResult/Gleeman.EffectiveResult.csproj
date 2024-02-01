@@ -1,17 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Title>Result pattern for returning from domain and services.</Title>
-    <Version>6.0.1</Version>
+    <Version>7.0.2</Version>
     <Description>Result pattern for returning from domain and services.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/oznakdn/EffectiveResult</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>ResultPattern, Result</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReleaseNotes>Response results  was added</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

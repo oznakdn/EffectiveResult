@@ -11,33 +11,28 @@ $ dotnet add package Gleeman.EffectiveResult
 
 ```csharp
 Result<User>.Failure(messages: errors);
+Result<User>.Success(value:user);
 ```
 
 ```csharp
 Result.Failure(messages: errors);
+Result.Success();
 ```
 
 # Response Usage
 
 ```csharp
-new Response().Failure
-              .AddMessage(messages: result.Messages)
-              .AddStatusCode(400);
+Response<User>.Unsuccessful(statusCode:404 , error: "Not found!");
 
-new Response<User>().Failure
-                    .AddMessage(messages: result.Messages)
-                    .AddStatusCode(400);
+Response<User>.Successful(values: result.Values, statusCode: 200);
+
 ```
 
 ```csharp
 
-new Response().Success
-              .AddStatusCode(200)
-              .AddMessage("User has been created successfully.");
+Response.Successful(204, "User has been created successfully.");
 
-new Response<User>() .Success
-                     .AddStatusCode(200)
-                     .GetValue(value: result.Value);
+Response.Unsuccessful(400, errors: result.Messages!);
 
 ```
 
@@ -86,6 +81,8 @@ public class User
 
     public static Result<User> GetUsers() => Result<User>.Success(values: _users);
 
+}
+
 ```
 
 ## Service
@@ -93,38 +90,24 @@ public class User
 ```csharp
 public class UserService : IUserService
 {
-    public Response<User> CreateUser(UserDto user)
+    public IResponse CreateUser(UserDto user)
     {
-        var result = User.CreateUser(user.FirstName,user.LastName,user.Email);
-        if(!result.IsSuccessed)
-        {
-            return new Response<User>()
-                        .Failure
-                        .AddMessage(messages: result.Messages)
-                        .AddStatusCode(400);
-        }
+        var result = User.CreateUser(user.FirstName, user.LastName, user.Email);
 
-        return new Response<User>()
-                         .Success
-                         .AddStatusCode(200)
-                         .GetValue(value: result.Value);
+        if (!result.IsSuccess)
+            return Response.Unsuccessful(404, errors: result.Messages!);
+        
+        return Response.Successful(200, "User has been created successfully.");
     }
 
-    public Response<User> GetUsers()
+    public IResponse<User> GetUsers()
     {
         var result = User.GetUsers();
 
-        if (result.Values.Count() == 0)
-            return new Response<User>()
-                        .Failure
-                        .AddMessage("There is no any user!")
-                        .AddStatusCode(200);
+        if (result.Values!.Count() == 0)
+            return Response<User>.Unsuccessful(statusCode: 404, error: "There is no any user!");
 
-        return new Response<User>()
-                        .Success
-                        .AddStatusCode(200)
-                        .GetValue(result.Values);
-
+        return Response<User>.Successful(values: result.Values!, statusCode: 200);
     }
 }
 ```
@@ -132,7 +115,6 @@ public class UserService : IUserService
 ## Controller
 
 ```csharp
-
 [Route("api/[controller]")]
 [ApiController]
 public class UserController : ControllerBase
@@ -148,14 +130,16 @@ public class UserController : ControllerBase
     public IActionResult CreateUser([FromBody] UserDto user)
     {
         var response = userService.CreateUser(user);
-        return response.IsSuccessed ? Ok(new { value = response.Value, statusCode = response.StatusCode }) : BadRequest(response.Messages);
+        return response.IsSuccess ? Ok(response) : BadRequest(response.Messages);
     }
 
     [HttpGet]
     public IActionResult GetUsers()
     {
-        var response = userService.GetUsers();
-        return response.IsSuccessed ? Ok(new {value = response.Values , statusCode= response.StatusCode}) : NotFound(new {message = response.Message, statusCode = response.StatusCode});
+        IResponse<User> response = userService.GetUsers();
+
+        return response.IsSuccess ? Ok(response) : NotFound(response);
     }
 }
+
 ```

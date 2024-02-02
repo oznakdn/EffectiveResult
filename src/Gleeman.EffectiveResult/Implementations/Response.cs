@@ -4,46 +4,34 @@ namespace Gleeman.EffectiveResult.Implementations;
 
 public class Response : IResponse
 {
+    public bool IsSuccess { get; private set; }
 
     public int? StatusCode { get; private set; }
 
-    public string? Message { get; private set; }
+    public string Message { get; private set; }
 
-    public IEnumerable<string>? Messages { get; private set; }
-
-    public bool IsSuccessed { get; private set; }
+    public IEnumerable<string> Messages { get; private set; }
 
 
-    public Response AddMessage(string? message = null, IEnumerable<string>? messages = null)
+    public static Response Successful(int? statusCode = null, string message = null)
     {
-        Message = message ?? string.Empty;
-        Messages = messages ?? Enumerable.Empty<string>();
-        return this;
-    }
-
-
-    public Response AddStatusCode(int statusCode)
-    {
-        StatusCode = statusCode;
-        return this;
-    }
-
-    public Response Success
-    {
-        get
+        return new Response
         {
-            IsSuccessed = true;
-            return this;
-        }
+            IsSuccess = true,
+            StatusCode = statusCode,
+            Message = message
+        };
     }
 
-    public Response Failure
+    public static Response Unsuccessful(int? statusCode = null, string error = null, IEnumerable<string> errors = null)
     {
-        get
+        return new Response
         {
-            IsSuccessed = false;
-            return this;
-        }
+            IsSuccess = false,
+            StatusCode = statusCode,
+            Message = error,
+            Messages = errors
+        };
     }
 
 
@@ -51,56 +39,57 @@ public class Response : IResponse
 
 public class Response<T> : IResponse<T>
 {
+
+    public bool IsSuccess { get; private set; }
     public int? StatusCode { get; private set; }
-    public bool IsSuccessed { get; private set; }
     public string? Message { get; private set; }
     public IEnumerable<string>? Messages { get; private set; }
     public T? Value { get; private set; }
     public IEnumerable<T>? Values { get; private set; }
 
 
-
-    public Response<T> Success
+    public static Response<T> Successful(int? statusCode = null, string message = null)
     {
-        get
+        return new Response<T>
         {
-            IsSuccessed = true;
-            return this;
-        }
+            IsSuccess = true,
+            StatusCode = statusCode,
+            Message = message
+        };
     }
 
-    public Response<T> Failure
+    public static Response<T> Successful(T value, int? statusCode = null, string message = null)
     {
-        get
+        return new Response<T>
         {
-            IsSuccessed = false;
-            return this;
-        }
+            IsSuccess = true,
+            Value = value,
+            StatusCode = statusCode,
+            Message = message
+        };
     }
 
-
-    public Response<T> AddMessage(string? message = null, IEnumerable<string>? messages = null)
+    public static Response<T> Successful(IEnumerable<T> values, int? statusCode = null, string message = null)
     {
-        Message = message ?? string.Empty;
-        Messages = messages ?? Enumerable.Empty<string>();
-        return this;
+        return new Response<T>
+        {
+            IsSuccess = true,
+            Values = values,
+            StatusCode = statusCode,
+            Message = message
+        };
     }
 
-    public Response<T> AddStatusCode(int statusCode)
+    public static Response<T> Unsuccessful(int? statusCode = null, string error = null, IEnumerable<string> errors = null)
     {
-        StatusCode = statusCode;
-        return this;
+        return new Response<T>
+        {
+            IsSuccess = false,
+            StatusCode = statusCode,
+            Message = error,
+            Messages = errors
+        };
     }
 
-    public Response<T> GetValue(T value)
-    {
-        Value = value;
-        return this;
-    }
 
-    public Response<T> GetValue(IEnumerable<T> values)
-    {
-        Values = values;
-        return this;
-    }
 }

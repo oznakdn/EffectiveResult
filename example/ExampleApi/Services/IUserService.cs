@@ -1,12 +1,12 @@
 ﻿using ExampleApi.Dtos;
 using ExampleApi.Models;
-using Gleeman.EffectiveResult.Implementations;
+using Gleeman.EffectiveResult.Interfaces;
 
 namespace ExampleApi.Services;
 
 public interface IUserService
 {
-    Response<User> GetUsers();
-    Response CreateUser(UserDto user);
+    IResponse<User> GetUsers();
+    IResponse CreateUser(UserDto user);
 
 }

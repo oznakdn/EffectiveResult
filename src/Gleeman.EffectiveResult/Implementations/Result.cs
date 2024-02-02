@@ -6,15 +6,14 @@ public class Result : IResult
 {
     public string? Message { get; private set; }
     public IEnumerable<string>? Messages { get; private set; }
-    public bool IsSuccessed { get; private set; }
+    public bool IsSuccess { get; private set; }
 
     public static Result Success(string message = null)
     {
         return new Result
         {
-            IsSuccessed = true,
-            Message = message ?? string.Empty,
-            Messages = Enumerable.Empty<string>()
+            IsSuccess = true,
+            Message = message
         };
     }
 
@@ -23,9 +22,9 @@ public class Result : IResult
     {
         return new Result
         {
-            IsSuccessed = false,
-            Message = message ?? string.Empty,
-            Messages = messages ?? Enumerable.Empty<string>()
+            IsSuccess = false,
+            Message = message,
+            Messages = messages
         };
     }
 
@@ -42,16 +41,15 @@ public class Result<T> : IResult<T>
 
     public IEnumerable<string>? Messages { get; private set; }
 
-    public bool IsSuccessed { get; private set; }
-
+    public bool IsSuccess { get; private set; }
 
     public static Result<T> Success(T value, string? message = null)
     {
         return new Result<T>
         {
-            IsSuccessed = true,
+            IsSuccess = true,
             Value = value,
-            Message = message ?? string.Empty,
+            Message = message
         };
     }
 
@@ -59,9 +57,9 @@ public class Result<T> : IResult<T>
     {
         return new Result<T>
         {
-            IsSuccessed = true,
+            IsSuccess = true,
             Values = values,
-            Message = message ?? string.Empty,
+            Message = message
         };
     }
 
@@ -69,10 +67,9 @@ public class Result<T> : IResult<T>
     {
         return new Result<T>
         {
-            IsSuccessed = false,
-            Message = message ?? string.Empty,
-            Messages = messages ?? Enumerable.Empty<string>(),
-            Values = Enumerable.Empty<T>(),
+            IsSuccess = false,
+            Message = message,
+            Messages = messages
         };
     }
 

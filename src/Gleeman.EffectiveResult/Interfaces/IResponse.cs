@@ -1,23 +1,16 @@
-using Gleeman.EffectiveResult.Implementations;
-
 namespace Gleeman.EffectiveResult.Interfaces;
 
-public interface IResponse : IBase
+public interface IResponse
 {
     int? StatusCode { get; }
-    Response AddMessage(string? message = null, IEnumerable<string>? messages = null);
-    Response AddStatusCode(int statusCode);
-    Response Success { get; }
-    Response Failure { get; }
+    string? Message { get; }
+    IEnumerable<string>?Messages { get; }
+    bool IsSuccess { get; }
+    
 }
 
-public interface IResponse<T> : IBase<T>
+public interface IResponse<T> : IResponse
 {
-    int? StatusCode { get; }
-    Response<T> AddMessage(string? message = null, IEnumerable<string>? messages = null);
-    Response<T> AddStatusCode(int statusCode);
-    Response<T> Success { get; }
-    Response<T> Failure { get;}
-    Response<T> GetValue(T value);
-    Response<T> GetValue(IEnumerable<T> values);
+    public T? Value { get; }
+    public IEnumerable<T>? Values { get;}
 }

@@ -1,6 +1,7 @@
 ﻿
 
 using Gleeman.EffectiveResult.Implementations;
+using Gleeman.EffectiveResult.Interfaces;
 
 namespace EffectiveResultTests;
 
@@ -46,7 +47,7 @@ public class User
 
 
 
-    public static Response<User>Create(string firstName, string lastName, string email)
+    public static IResponse<User> Create(string firstName, string lastName, string email)
     {
         var errors = new List<string>();
         if (string.IsNullOrEmpty(firstName)) errors.Add("First name cannot be empty!");
@@ -54,10 +55,8 @@ public class User
         if (string.IsNullOrEmpty(email)) errors.Add("Email cannot be empty!");
 
         if (errors.Count > 0)
-            return new Response<User>()
-                .Failure
-                .AddMessage(messages: errors)
-                .AddStatusCode(400);
+            return Response<User>.Unsuccessful(statusCode: 400, errors: errors);
+
 
         User user = new()
         {
@@ -68,29 +67,20 @@ public class User
 
         _users.Add(user);
 
-        return new Response<User>()
-                    .Success
-                    .AddMessage("User has been created successfully")
-                    .AddStatusCode(200)
-                    .GetValue(user);
-
+        return Response<User>.Successful(statusCode: 200, message: "User has been created successfully", value: user);
 
     }
 
-    public static Response<User>Get()
+    public static IResponse<User> Get()
     {
         var users = _users.ToList();
 
         if (users.Count == 0)
-            return new Response<User>()
-                    .Failure
-                    .AddMessage("There is no any user!")
-                    .AddStatusCode(404);
+            return Response<User>.Unsuccessful(error: "There is no any user!", statusCode: 404);
 
-        return new Response<User>()
-                    .Success
-                    .AddStatusCode(200)
-                    .GetValue(users);
+
+        return Response<User>.Successful(statusCode: 200, values: users);
+           
     }
 
 }

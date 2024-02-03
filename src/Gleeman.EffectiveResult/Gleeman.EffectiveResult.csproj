@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Title>Result pattern for returning from domain and services.</Title>
-    <Version>7.1.0</Version>
+    <Version>7.2.0</Version>
     <Description>Result pattern for returning from domain and services.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/oznakdn/EffectiveResult</RepositoryUrl>

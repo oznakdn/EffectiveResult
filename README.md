@@ -36,10 +36,32 @@ Response.Unsuccessful(400, errors: result.Messages!);
 
 ```
 
+# Response Builder Usage
+
+```csharp
+AbstractBuilder builder = new ResponseBuilder()
+                             .SetMessage("Message")
+                             .SetStatusCode(400)
+                             .SetSuccessedOrFailed(false);
+
+
+```
+
+```csharp
+
+AbstractBuilder<Role> builder = new ResponseBuilder<Role>()
+                                .SetStatusCode(200)
+                                .SetSuccessedOrFailed(true)
+                                .SetValues(_roles);
+
+```
 
 # Example
 
 ## Model
+
+### User
+
 ```csharp
 public class User
 {
@@ -82,7 +104,69 @@ public class User
     public static Result<User> GetUsers() => Result<User>.Success(values: _users);
 
 }
+```
 
+### Role
+
+```csharp
+public class Role
+{
+    public string Title { get; private set; }
+
+    private static List<Role> _roles = new();
+
+    public Role(string title)
+    {
+        Title = title;
+    }
+
+    public static IResponse CreateRole(Role role)
+    {
+        AbstractBuilder builder = new ResponseBuilder();
+
+        if (string.IsNullOrEmpty(role.Title))
+        {
+            builder = builder.SetMessage("Title cannot be null!")
+                             .SetStatusCode(400)
+                             .SetSuccessedOrFailed(false);
+        }
+        else
+        {
+            _roles.Add(role);
+            builder = builder.SetMessage("Role has been added.")
+                             .SetStatusCode(400)
+                             .SetSuccessedOrFailed(true);
+        }
+
+        Response result = builder.Build;
+        return result;
+
+    }
+
+    public static IResponse<Role>GetRoles()
+    {
+        AbstractBuilder<Role> builder = new ResponseBuilder<Role>();
+
+        if(_roles.Count == 0)
+        {
+            builder = builder.
+                              SetMessage("There is no any role!")
+                             .SetStatusCode(404)
+                             .SetSuccessedOrFailed(false)
+                             .SetValues(_roles);
+        }
+        else
+        {
+            builder = builder
+                             .SetStatusCode(200)
+                             .SetSuccessedOrFailed(true)
+                             .SetValues(_roles);
+        }
+
+        var result = builder.Build;
+        return result;
+
+    }
 ```
 
 ## Service
@@ -114,6 +198,7 @@ public class UserService : IUserService
 
 ## Controller
 
+### UserController
 ```csharp
 [Route("api/[controller]")]
 [ApiController]
@@ -142,4 +227,28 @@ public class UserController : ControllerBase
     }
 }
 
+```
+
+
+### RoleController
+```csharp
+[Route("api/[controller]")]
+[ApiController]
+public class RoleController : ControllerBase
+{
+    [HttpPost]
+    public IActionResult CreateRole([FromBody] RoleDto roleDto)
+    {
+        var role = new Role(roleDto.Title);
+        var response = Role.CreateRole(role);
+        return response.IsSuccess ? Ok(response) : BadRequest(response);
+    }
+
+    [HttpGet]
+    public IActionResult GetRoles()
+    {
+        var response = Role.GetRoles();
+        return response.IsSuccess ? Ok(response) : NotFound(response);
+    }
+}
 ```
